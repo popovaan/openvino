@@ -8,13 +8,21 @@ import tensorflow_hub as hub
 from openvino.runtime import op, PartialShape, Type as OVType, OVAny, Shape
 
 # model = hub.load('https://tfhub.dev/google/vggish/1')
-#
+# #
 # # Input: 3 seconds of silence as mono 16 kHz waveform samples.
 # waveform = np.zeros(3 * 16000, dtype=np.float32)
-#
+# tf2_net = tf.keras.Model(inputs=waveform, outputs=model(waveform))
 # # Run the model, check the output.
 # embeddings = model(waveform)
 # embeddings.shape.assert_is_compatible_with([None, 128])
+
+input_names = ["Input1", "Input2"]
+input_shape = [1]
+
+x1 = tf.keras.Input(shape=input_shape, name=input_names[0])
+x2 = tf.keras.Input(shape=input_shape, name=input_names[1])
+y = tf.nn.sigmoid(tf.nn.relu(x1))
+keras_net = tf.keras.Model(inputs=x1, outputs=[y])
 
 
 # small test model
@@ -22,10 +30,10 @@ from openvino.runtime import op, PartialShape, Type as OVType, OVAny, Shape
 original_const_value = np.random.rand(500,100,300,30)
 # # tf_const_type = tf.float32
 # # original_const_value_flatten = original_const_value.flatten()
-# create TF graph
+#create TF graph
 # with tf.compat.v1.Session() as sess:
-#     inp1 = tf.compat.v1.placeholder(tf.float32, original_const_value.shape, 'Input')
-#     const = tf.constant(original_const_value, dtype=tf.float32)
+#     inp1 = tf.compat.v1.placeholder(tf.int32, original_const_value.shape, 'Input')
+#     const = tf.constant(original_const_value, dtype=tf.int32)
 #     res = inp1 + const
 #
 #     tf.compat.v1.global_variables_initializer()
@@ -40,13 +48,13 @@ original_const_value = np.random.rand(500,100,300,30)
 # tf2_net = tf.keras.Model(inputs=[], outputs=[y])
 # tf.save_model.save(tf2_net, "/home/panas/Desktop/saved_model/", save_format='tf')
 # model = tf.saved_model.load("/home/panas/Desktop/saved_model/")
-
+#
 # model_input = np.random.rand(1,100,100,3)
 # model = hub.KerasLayer("https://tfhub.dev/google/imagenet/mobilenet_v1_100_224/classification/5")
 # model.build([None, 224, 224, 3]) # Batch input shape.
 
 
-#
+
 # model = hub.KerasLayer("https://tfhub.dev/tensorflow/efficientnet/b0/feature-vector/1",
 #                    trainable=False)
 # #m.build([None, expect_img_size, expect_img_size, 3])  # Batch input shape.
@@ -56,8 +64,8 @@ original_const_value = np.random.rand(500,100,300,30)
 
 #
 #model_path = "/mnt/data/vdp_tests/internal/tf/1.15.2/nasnet-a_large/nasnet-a_large.pb"
-#model_path = "/mnt/data/vdp_tests/internal/tf/1.15.2/BERT/bert-xnli/bert_xnli_logits.pb"
-model_path = "/home/panas/git/openvino/samples/efficientnet-b0.pb"
+model_path = "/mnt/data/vdp_tests/internal/tf/1.15.2/BERT/bert-xnli/bert_xnli_logits.pb"
+#model_path = "/home/panas/git/openvino/samples/efficientnet-b0.pb"
 #model_path = "/home/panas/git/openvino/samples/mobilenet_v1_100_224.pb"
 #
 
@@ -180,14 +188,14 @@ def get_vars_list_from_tf_graph(tf_graph):
     return vars_list, size_sum
 
 
-start_time = datetime.datetime.now()
+#start_time = datetime.datetime.now()
 # Wrap to tf.function
 # @tf.function
 # def tf_function(x):
 #     return model(x)
-#
-# # Model tracing
-# concrete_func = tf_function.get_concrete_function(model_input)
+
+# Model tracing
+#concrete_func = tf_function.get_concrete_function(model_input)
 
 #freeze
 # from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2
@@ -198,32 +206,56 @@ start_time = datetime.datetime.now()
 
 # Get tf.Graph
 #tf_graph = concrete_func.graph
+# start_time = datetime.datetime.now()
+# vars, size_vars = get_vars_list_from_tf_graph(tf_graph)
+# consts, size_consts, op_count = get_const_list_from_tf_graph(tf_graph)
+#
+#
+# elapsed_time = datetime.datetime.now() - start_time
+# print('Create constant from vars time: {:.2f} seconds. '.format(elapsed_time.total_seconds()))
+#
+# print("Total size: {}".format(size_vars + size_consts))
+# print("Counst count: {}".format(len(consts + vars)))
+# print("Op count: {}".format(op_count))
 
-vars, size_vars = get_vars_list_from_tf_graph(tf_graph)
-consts, size_consts, op_count = get_const_list_from_tf_graph(tf_graph)
 
-
-elapsed_time = datetime.datetime.now() - start_time
-print('Create constant from vars time: {:.2f} seconds. '.format(elapsed_time.total_seconds()))
-
-print("Total size: {}".format(size_vars + size_consts))
-print("Counst count: {}".format(len(consts + vars)))
-print("Op count: {}".format(op_count))
-
-# 
 # from openvino.frontend.tensorflow.graph_iterator import GraphIteratorTFGraph
+# from openvino.frontend import FrontEndManager
+#
+# start_time = datetime.datetime.now()
 # iterator = GraphIteratorTFGraph(tf_graph)
+# fem = FrontEndManager()
+# fe = fem.load_by_framework("tf")
+#
+# input_model = fe.load(iterator)
+# ov_model = fe.convert(input_model)
+# elapsed_time = datetime.datetime.now() - start_time
+# print('fe.load+fe.convert time: {:.2f} seconds. '.format(elapsed_time.total_seconds()))
 
+#
 start_time = datetime.datetime.now()
-ov_model = convert_model(tf_graph.as_graph_def())
+ov_model = convert_model(tf_graph)
 elapsed_time = datetime.datetime.now() - start_time
-print('convert_model time: {:.2f} seconds. '.format(elapsed_time.total_seconds()))
+print('convert_model with decoder time: {:.2f} seconds. '.format(elapsed_time.total_seconds()))
+
+# make IR
+from openvino.runtime import serialize
+serialize(ov_model, "/home/panas/Desktop/read_from_memory_irs/ir_decoder.xml")
+
+
+
+#
+#
+# start_time = datetime.datetime.now()
+# ov_model = convert_model(tf_graph.as_graph_def())
+# elapsed_time = datetime.datetime.now() - start_time
+# print('convert_model time: {:.2f} seconds. '.format(elapsed_time.total_seconds()))
 
 
 
 # get variables names for placeholders
-# list(tf_graph.captures)[0][1].name
-# list(tf_graph.captures)[0][0]._name
+# list(tf_graph.captures)[0][1].name # operations
+# list(tf_graph.captures)[0][0]._name # variables
 # tf_graph.get_operations()[1].outputs[0]._name == list(tf_graph.captures)[0][1].name
 # tf_graph.variables[28].name == list(tf_graph.captures)[0][0]._name
 
