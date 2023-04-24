@@ -14,6 +14,8 @@
 #include <transformations/smart_reshape/shape_of_const_folding.hpp>
 #include <transformations/smart_reshape/smart_reshape.hpp>
 #include <transformations/smart_reshape/strided_slice_squeeze.hpp>
+#include <transformations/smart_reshape/interpolate_concat.hpp>
+
 
 #include "itt.hpp"
 
@@ -33,6 +35,7 @@ bool ov::pass::SmartReshape::run_on_model(const std::shared_ptr<ngraph::Function
     static_manager.register_pass<ov::pass::BroadcastConstRangeReplacement>();
     static_manager.register_pass<ov::pass::LSTMStatesBroadcast>();
     static_manager.register_pass<ov::pass::ReshapeSinkingMatMul>();
+    static_manager.register_pass<ov::pass::InterpolateConcatReplacement>();
     static_manager.run_passes(f);
 
     ngraph::pass::Manager dynamic_manager;

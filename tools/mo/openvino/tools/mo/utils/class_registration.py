@@ -280,39 +280,39 @@ def apply_transform(graph: Graph, replacer_cls, **kwargs):
 
     log.debug("Run replacer {}".format(replacer_cls))
 
-    try:
-        if hasattr(replacer, 'run_not_recursively') and replacer.run_not_recursively:
-            replacer.find_and_replace_pattern(graph)
-        else:
-            for_graph_and_each_sub_graph_recursively(graph, replacer.find_and_replace_pattern)
+   # try:
+    if hasattr(replacer, 'run_not_recursively') and replacer.run_not_recursively:
+        replacer.find_and_replace_pattern(graph)
+    else:
+        for_graph_and_each_sub_graph_recursively(graph, replacer.find_and_replace_pattern)
 
-        if hasattr(replacer, 'force_clean_up') and replacer.force_clean_up:
-            for_graph_and_each_sub_graph_recursively(graph, lambda G: G.clean_up())
+    if hasattr(replacer, 'force_clean_up') and replacer.force_clean_up:
+        for_graph_and_each_sub_graph_recursively(graph, lambda G: G.clean_up())
 
-        if hasattr(replacer, 'force_shape_inference') and replacer.force_shape_inference:
-            shape_inference(graph)
+    if hasattr(replacer, 'force_shape_inference') and replacer.force_shape_inference:
+        shape_inference(graph)
 
-        if hasattr(replacer, 'run_not_recursively') and replacer.run_not_recursively:
-            graph.check_empty_graph(replacer_cls)
-            graph.check_shapes_consistency()
-        else:
-            for_graph_and_each_sub_graph_recursively(graph, lambda _: graph.check_empty_graph(replacer_cls))
-            for_graph_and_each_sub_graph_recursively(graph, lambda _: graph.check_shapes_consistency())
+    if hasattr(replacer, 'run_not_recursively') and replacer.run_not_recursively:
+        graph.check_empty_graph(replacer_cls)
+        graph.check_shapes_consistency()
+    else:
+        for_graph_and_each_sub_graph_recursively(graph, lambda _: graph.check_empty_graph(replacer_cls))
+        for_graph_and_each_sub_graph_recursively(graph, lambda _: graph.check_shapes_consistency())
 
-    except Error as err:
-        raise Error('Exception occurred during running replacer "{}" ({}): {}'.format(
-            replacement_id,
-            replacer_cls,
-            str(err).replace('[REPLACEMENT_ID]', replacement_id),
-        )) from err
-    except FrameworkError as err:
-        raise FrameworkError('{}'.format(str(err))) from err
-    except Exception as err:
-        raise Exception('Exception occurred during running replacer "{} ({})": {}'.format(
-            replacement_id,
-            replacer_cls,
-            str(err).replace('[REPLACEMENT_ID]', replacement_id),
-        )) from err
+    # except Error as err:
+    #     raise Error('Exception occurred during running replacer "{}" ({}): {}'.format(
+    #         replacement_id,
+    #         replacer_cls,
+    #         str(err).replace('[REPLACEMENT_ID]', replacement_id),
+    #     )) from err
+    # except FrameworkError as err:
+    #     raise FrameworkError('{}'.format(str(err))) from err
+    # except Exception as err:
+    #     raise Exception('Exception occurred during running replacer "{} ({})": {}'.format(
+    #         replacement_id,
+    #         replacer_cls,
+    #         str(err).replace('[REPLACEMENT_ID]', replacement_id),
+    #     )) from err
 
 
 def apply_replacements_list(graph: Graph, replacers_order: list):
