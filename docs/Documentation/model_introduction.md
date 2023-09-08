@@ -38,12 +38,12 @@ Model conversion API is exposed in Python by means of ``openvino.convert_model``
       .. code-block:: py
       :force:
 
-         import torch
-         from torchvision.models import resnet50
+         import numpy as np
          import openvino as ov
+         from torchvision.models import resnet50
 
          model = resnet50(pretrained=True)
-         ov_model = ov.convert_model(model, example_input=torch.rand(1, 3, 224, 224))
+         ov_model = ov.convert_model(model, example_input=np.random.rand(1, 3, 224, 224).astype(np.float32))
 
          ###### Option 1: Save to OpenVINO IR:
 
@@ -56,7 +56,6 @@ Model conversion API is exposed in Python by means of ``openvino.convert_model``
          compiled_model = ov.compile_model(ov_model)
 
          # prepare input_data your way
-         import numpy as np
          input_data = np.random.rand(1, 3, 224, 224)
 
          # run the inference
@@ -96,10 +95,10 @@ Model conversion API is exposed in Python by means of ``openvino.convert_model``
 
       .. code-block:: py
 
-         import tensorflow_hub as tf
+         import tensorflow as tf
          import openvino as ov
 
-         tf_model = model = tf.keras.applications.ResNet50(weights="imagenet")
+         tf_model = tf.keras.applications.ResNet50(weights="imagenet")
          ov_model = ov.convert_model(tf_model)
 
          ###### Option 1: Save to OpenVINO IR:
@@ -130,7 +129,10 @@ Model conversion API is exposed in Python by means of ``openvino.convert_model``
          model = tf.keras.Sequential([
                hub.KerasLayer("https://tfhub.dev/google/imagenet/mobilenet_v1_100_224/classification/5")
          ])
+
+         # Check model page for information about input shape: https://tfhub.dev/google/imagenet/mobilenet_v1_100_224/classification/5
          model.build([None, 224, 224, 3])
+
          model.save('mobilenet_v1_100_224')  # use temporary directory
          ov_model = ov.convert_model('mobilenet_v1_100_224')
 
