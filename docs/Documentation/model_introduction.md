@@ -38,12 +38,16 @@ Model conversion API is exposed in Python by means of ``openvino.convert_model``
       .. code-block:: py
       :force:
 
-         import numpy as np
-         import openvino as ov
+         import torch
          from torchvision.models import resnet50
+         import openvino as ov
 
          model = resnet50(pretrained=True)
-         ov_model = ov.convert_model(model, example_input=np.random.rand(1, 3, 224, 224).astype(np.float32))
+
+         # prepare input_data
+         input_data = torch.rand(1, 3, 224, 224)
+
+         ov_model = ov.convert_model(model, example_input=input_data)
 
          ###### Option 1: Save to OpenVINO IR:
 
@@ -54,9 +58,6 @@ Model conversion API is exposed in Python by means of ``openvino.convert_model``
 
          # compile model
          compiled_model = ov.compile_model(ov_model)
-
-         # prepare input_data your way
-         input_data = np.random.rand(1, 3, 224, 224)
 
          # run the inference
          result = compiled_model(input_data)
