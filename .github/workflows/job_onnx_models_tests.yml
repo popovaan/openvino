@@ -89,7 +89,7 @@ jobs:
       #   run: bash ${OPENVINO_REPO}/src/frontends/onnx/tests/tests_python/model_zoo_preprocess.sh -d ${MODELS_SHARE_PATH} -o -s "${{ env.ONNX_MODEL_ZOO_SHA }}"
 
       - name: Fetch install wheels action
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         timeout-minutes: 15
         with:
           sparse-checkout: |
